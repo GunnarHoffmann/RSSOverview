@@ -7,19 +7,6 @@ def load_rss_feeds_from_file(file_path):
         rss_feeds = [line.strip() for line in file.readlines() if line.strip()]
     return rss_feeds
 
-# Function to read search terms from a file
-def load_search_terms_from_file(file_path):
-    search_terms = {}
-    with open(file_path, 'r') as file:
-        for line in file:
-            if ':' in line:
-                category, term = line.strip().split(':')
-                if category in search_terms:
-                    search_terms[category].append(term)
-                else:
-                    search_terms[category] = [term]
-    return search_terms
-
 # Function to fetch and parse the feeds
 def fetch_rss_feed(url):
     return feedparser.parse(url)
@@ -46,6 +33,14 @@ st.markdown("""
 st.title("Data & AI Newsfeed")
 st.subheader("Aggregating curated RSS feeds and Internet-based semantic search in one place")
 
+# Initialize session state for toggle logic
+if 'show_rss_output' not in st.session_state:
+    st.session_state['show_rss_output'] = False
+
+# Function to toggle RSS output visibility
+def toggle_rss_output():
+    st.session_state['show_rss_output'] = not st.session_state['show_rss_output']
+
 # ----------- RSS Feeds Section (Form with Background) ------------
 with st.form(key='rss_form'):
     st.markdown('<div class="rss-section">', unsafe_allow_html=True)
@@ -59,14 +54,14 @@ with st.form(key='rss_form'):
     # Multi-select box for choosing RSS feeds
     selected_feeds = st.multiselect("Select the RSS feeds you'd like to include:", rss_feeds, default=rss_feeds)
 
-    # Submit button for RSS form
-    rss_submit = st.form_submit_button(label="Update RSS Feeds")
+    # Submit button to toggle RSS output
+    st.form_submit_button(label="Show/Hide RSS Output", on_click=toggle_rss_output)
 
     # List to collect articles for display
     articles_list = []
 
-    # Fetch and display the selected feeds if the form is submitted
-    if rss_submit:
+    # Toggle logic to show or hide the RSS output
+    if st.session_state['show_rss_output']:
         for feed_url in selected_feeds:
             feed = fetch_rss_feed(feed_url)
 
