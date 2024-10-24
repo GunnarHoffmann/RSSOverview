@@ -9,10 +9,10 @@ openai.api_key = st.secrets["openai"]["api_key"]
 def summarize_content_with_gpt(content):
     try:
         response = openai.Completion.create(
-            engine="text-davinci-003",  # You can use other models like 'gpt-3.5-turbo' as well
+            engine="text-davinci-003",  # Or use 'gpt-3.5-turbo' depending on your API access
             prompt=f"Summarize the following content:\n\n{content}",
-            max_tokens=150,  # Adjust for the length of the summary
-            temperature=0.7  # Adjust to control the creativity
+            max_tokens=150,  # Adjust as necessary for the length of the summary
+            temperature=0.7  # Control the randomness of the output
         )
         summary = response.choices[0].text.strip()
         return summary
@@ -25,7 +25,7 @@ def load_rss_feeds_from_file(file_path):
         rss_feeds = [line.strip() for line in file.readlines() if line.strip()]
     return rss_feeds
 
-# Function to fetch and parse the feeds
+# Function to fetch and parse the RSS feeds
 def fetch_rss_feed(url):
     return feedparser.parse(url)
 
@@ -39,3 +39,99 @@ st.markdown("""
         margin-bottom: 20px;
     }
     .combined-section {
+        background-color: #e0e0e0;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# Streamlit application title and subtitle
+st.title("Data & AI Newsfeed")
+st.subheader("Aggregating curated RSS feeds and Internet-based semantic search in one place")
+
+# Initialize session state for toggle logic
+if 'show_rss_output' not in st.session_state:
+    st.session_state['show_rss_output'] = False
+
+if 'show_combined_output' not in st.session_state:
+    st.session_state['show_combined_output'] = False
+
+# Function to toggle RSS output visibility
+def toggle_rss_output():
+    st.session_state['show_rss_output'] = not st.session_state['show_rss_output']
+
+# Function to toggle combined output visibility
+def toggle_combined_output():
+    st.session_state['show_combined_output'] = not st.session_state['show_combined_output']
+
+# ----------- RSS Feeds Section (Form with Background) ------------
+with st.form(key='rss_form'):
+    st.markdown('<div class="rss-section">', unsafe_allow_html=True)
+    
+    st.header("RSS Feeds")
+
+    # Load RSS feeds from a file
+    rss_feed_file = 'rss_feeds.txt'  # Path to your file with RSS feeds
+    rss_feeds = load_rss_feeds_from_file(rss_feed_file)
+
+    # Multi-select box for choosing RSS feeds
+    selected_feeds = st.multiselect("Select the RSS feeds you'd like to include:", rss_feeds, default=rss_feeds)
+
+    # List to collect articles for display
+    articles_list = []
+    combined_rss_content = ""
+
+    # Always load RSS feed content for Combined Output
+    for feed_url in selected_feeds:
+        feed = fetch_rss_feed(feed_url)
+
+        if feed.bozo:  # Check if the feed was parsed successfully
+            continue
+
+        # Collect the latest entries from the feed (e.g., the last 5)
+        for entry in feed.entries[:5]:
+            articles_list.append({
+                "Title": entry.title,
+                "Published": entry.published,
+                "Link": entry.link,
+                "Summary": entry.summary
+            })
+            combined_rss_content += f"{entry.title}\n{entry.published}\n{entry.summary}\n\n"
+
+    # Submit button to toggle RSS output
+    rss_submit = st.form_submit_button(label="Show/Hide RSS Output", on_click=toggle_rss_output)
+
+    # Toggle logic to show or hide the RSS output
+    if st.session_state['show_rss_output'] and rss_submit:
+        for article in articles_list:
+            with st.expander(f"{article['Title']} (Published: {article['Published']})"):
+                st.write(article['Summary'])
+                st.write(f"[Read more]({article['Link']})")
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# Add visual separation between sections
+st.markdown("---")  # Horizontal line
+
+# ----------- Combined Output Section (Form with Background) ------------
+with st.form(key='combined_output_form'):
+    st.markdown('<div class="combined-section">', unsafe_allow_html=True)
+    
+    st.header("Combined Output")
+
+    # Submit button to toggle Combined Output visibility
+    combined_submit = st.form_submit_button(label="Show/Hide Combined Output", on_click=toggle_combined_output)
+
+    # Display combined RSS feed content in a text area (controlled by toggle)
+    if st.session_state['show_combined_output'] and combined_submit:
+        if articles_list:
+            st.text_area("Combined RSS Feed Content", value=combined_rss_content, height=300)
+
+            # Summarize the content using OpenAI API
+            summary = summarize_content_with_gpt(combined_rss_content)
+            st.subheader("Summary (Powered by GPT):")
+            st.write(summary)
+
+    st.markdown('</div>', unsafe_allow_html=True)
