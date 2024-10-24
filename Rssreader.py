@@ -7,6 +7,19 @@ def load_rss_feeds_from_file(file_path):
         rss_feeds = [line.strip() for line in file.readlines() if line.strip()]
     return rss_feeds
 
+# Function to read search terms from a file
+def load_search_terms_from_file(file_path):
+    search_terms = {}
+    with open(file_path, 'r') as file:
+        for line in file:
+            if ':' in line:
+                category, term = line.strip().split(':')
+                if category in search_terms:
+                    search_terms[category].append(term)
+                else:
+                    search_terms[category] = [term]
+    return search_terms
+
 # Function to fetch and parse the feeds
 def fetch_rss_feed(url):
     return feedparser.parse(url)
