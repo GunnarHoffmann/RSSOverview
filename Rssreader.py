@@ -7,7 +7,7 @@ import streamlit as st
 # Read the Azure OpenAI API details from Streamlit secrets
 api_key = st.secrets["azure_openai"]["api_key"]
 endpoint = st.secrets["azure_openai"]["endpoint"]
-deployment_name = st.secrets["azure_openai"]["deployment_name"]
+deployment = st.secrets["azure_openai"]["deployment_name"]
 
 # Function to call Azure OpenAI's Chat API to summarize the content
 def summarize_content_with_azure(content):
@@ -18,11 +18,17 @@ def summarize_content_with_azure(content):
         }
         body = {
             "messages": [
+                {"role": "system", "content": "You are an AI assistant that helps people find information."},
                 {"role": "user", "content": f"Summarize the following content:\n\n{content}"}
-            ]
+            ],
+            "max_tokens": 800,
+            "temperature": 0.7,
+            "top_p": 0.95,
+            "frequency_penalty": 0,
+            "presence_penalty": 0
         }
         response = requests.post(
-            f"{endpoint}/openai/deployments/{deployment_name}/chat/completions?api-version=2023-03-15-preview",
+            f"{endpoint}/openai/deployments/{deployment}/chat/completions?api-version=2024-05-01-preview",
             headers=headers,
             json=body
         )
