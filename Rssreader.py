@@ -20,19 +20,12 @@ def load_search_terms_from_file(file_path):
                     search_terms[category] = [term]
     return search_terms
 
-# Funktion zum Speichern von Suchbegriffen in eine Datei
-def save_search_terms_to_file(file_path, search_terms):
-    with open(file_path, 'w') as file:
-        for category, terms in search_terms.items():
-            for term in terms:
-                file.write(f"{category}:{term}\n")
-
 # Funktion zum Abrufen und Bündeln der Feeds
 def fetch_rss_feed(url):
     return feedparser.parse(url)
 
 # Streamlit Anwendung
-st.title("RSS-Feed Aggregator und Suchbegriffe")
+st.title("RSS-Feed Aggregator mit Suchbegriffen")
 
 # ----------- RSS Feeds Bereich ------------
 st.header("RSS-Feeds")
@@ -75,45 +68,14 @@ for article in articles_list:
         st.write(article['Summary'])
         st.write(f"[Mehr lesen]({article['Link']})")
 
-# ----------- Suchbegriffe Management Bereich ------------
-st.header("Suchbegriffe Verwaltung")
+# ----------- Suchbegriffe Auswahl Bereich ------------
+st.header("Suchbegriffe Auswahl")
 
 # Suchbegriffe aus einer Datei laden
 search_terms_file = 'searchterms.txt'  # Pfad zu deiner Datei mit den Suchbegriffen
 search_terms = load_search_terms_from_file(search_terms_file)
 
-# Auswahlbox: Bestehende Kategorie oder neue Kategorie hinzufügen
-existing_categories = list(search_terms.keys()) + ["Neue Kategorie hinzufügen"]
-selected_category = st.selectbox("Wähle eine Kategorie oder füge eine neue hinzu:", existing_categories)
-
-# Neue Kategorie hinzufügen (falls ausgewählt)
-if selected_category == "Neue Kategorie hinzufügen":
-    new_category = st.text_input("Gib den Namen der neuen Kategorie ein:")
-else:
-    new_category = None
-
-# Eingabefeld für den neuen Suchbegriff
-new_term = st.text_input("Gib den neuen Suchbegriff ein:")
-
-# Validierung und Hinzufügen des neuen Suchbegriffs
-if st.button("Suchbegriff hinzufügen"):
-    if not new_term:
-        st.error("Der Suchbegriff darf nicht leer sein!")
-    elif not selected_category and not new_category:
-        st.error("Bitte wähle eine bestehende Kategorie oder füge eine neue Kategorie hinzu!")
-    else:
-        category = new_category if new_category else selected_category
-        if category not in search_terms:
-            search_terms[category] = []
-        search_terms[category].append(new_term)
-        save_search_terms_to_file(search_terms_file, search_terms)
-        st.success(f"Suchbegriff '{new_term}' wurde der Kategorie '{category}' hinzugefügt!")
-
-# ------------ Bestehende Suchbegriffe anzeigen und auswählen ------------
-
-st.header("Bestehende Suchbegriffe")
-
-# Zeige alle bestehenden Suchbegriffe nach Kategorien
+# Auswahl der Suchbegriffe nach Kategorien (alle Suchbegriffe vorausgewählt)
 selected_terms = []
 for category, terms in search_terms.items():
     selected = st.multiselect(f"Wähle Suchbegriffe aus der Kategorie '{category}':", terms, default=terms)
