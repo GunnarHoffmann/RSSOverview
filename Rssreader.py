@@ -56,9 +56,16 @@ st.subheader("Aggregating curated RSS feeds and Internet-based semantic search i
 if 'show_rss_output' not in st.session_state:
     st.session_state['show_rss_output'] = False
 
+if 'show_search_output' not in st.session_state:
+    st.session_state['show_search_output'] = False
+
 # Function to toggle RSS output visibility
 def toggle_rss_output():
     st.session_state['show_rss_output'] = not st.session_state['show_rss_output']
+
+# Function to toggle search output visibility
+def toggle_search_output():
+    st.session_state['show_search_output'] = not st.session_state['show_search_output']
 
 # ----------- RSS Feeds Section (Form with Background) ------------
 with st.form(key='rss_form'):
@@ -78,31 +85,24 @@ with st.form(key='rss_form'):
 
     # List to collect articles for display
     articles_list = []
+    combined_rss_content = ""
 
-    # Toggle logic to show or hide the RSS output
-    if st.session_state['show_rss_output']:
-        combined_rss_content = ""
-        for feed_url in selected_feeds:
-            feed = fetch_rss_feed(feed_url)
+    # Always load RSS feed content, but control visibility with toggle
+    for feed_url in selected_feeds:
+        feed = fetch_rss_feed(feed_url)
 
-            if feed.bozo:  # Check if the feed was parsed successfully
-                continue
+        if feed.bozo:  # Check if the feed was parsed successfully
+            continue
 
-            # Collect the latest entries from the feed (e.g., the last 5)
-            for entry in feed.entries[:5]:
-                articles_list.append({
-                    "Title": entry.title,
-                    "Published": entry.published,
-                    "Link": entry.link,
-                    "Summary": entry.summary
-                })
-                combined_rss_content += f"{entry.title}\n{entry.published}\n{entry.summary}\n\n"
-
-        # Display details for each article (with Click-to-Expand functionality)
-        for article in articles_list:
-            with st.expander(f"{article['Title']} (Published: {article['Published']})"):
-                st.write(article['Summary'])
-                st.write(f"[Read more]({article['Link']})")
+        # Collect the latest entries from the feed (e.g., the last 5)
+        for entry in feed.entries[:5]:
+            articles_list.append({
+                "Title": entry.title,
+                "Published": entry.published,
+                "Link": entry.link,
+                "Summary": entry.summary
+            })
+            combined_rss_content += f"{entry.title}\n{entry.published}\n{entry.summary}\n\n"
 
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -126,10 +126,10 @@ with st.form(key='search_form'):
         selected_terms.extend(selected)
 
     # Submit button for search terms form
-    search_submit = st.form_submit_button(label="Update Search Terms")
+    st.form_submit_button(label="Show/Hide Search Output", on_click=toggle_search_output)
 
-    # Handle form submission for search terms (display selected terms)
-    if search_submit:
+    # Handle form submission for search terms (control visibility with toggle)
+    if st.session_state['show_search_output']:
         st.write("Selected search terms:", ", ".join(selected_terms))
 
     st.markdown('</div>', unsafe_allow_html=True)
@@ -141,9 +141,9 @@ with st.form(key='combined_output_form'):
     st.header("Combined Output")
 
     # Display combined RSS feed content in a text area
-    if st.session_state['show_rss_output'] and articles_list:
+    if articles_list and st.session_state['show_rss_output']:
         st.text_area("Combined RSS Feed Content", value=combined_rss_content, height=300)
-    
+
     st.form_submit_button(label="Refresh Combined Output")
 
     st.markdown('</div>', unsafe_allow_html=True)
