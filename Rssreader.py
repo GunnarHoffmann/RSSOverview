@@ -32,29 +32,24 @@ st.title("RSS-Feed Aggregator mit Suchbegriffen")
 rss_feed_file = 'rss_feeds.txt'  # Der Pfad zu deiner Datei mit den Feeds
 rss_feeds = load_rss_feeds_from_file(rss_feed_file)
 
-# Suchbegriffe aus einer Datei laden
-search_term_file = 'searchterms.txt'  # Der Pfad zu deiner Datei mit den Suchbegriffen
-search_terms = load_search_terms_from_file(search_term_file)
-
 # Auswahlbox zum Auswählen der RSS-Feeds
 selected_feeds = st.multiselect("Wähle die RSS-Feeds, die du einbeziehen möchtest:", rss_feeds, default=rss_feeds)
 
-# Zeigt die vordefinierten Suchbegriffe aus der Datei
-st.write("Vordefinierte Suchbegriffe:")
+# Optional: Eingabefeld für zusätzliche Feeds
+new_feed_url = st.text_input("Füge einen neuen RSS-Feed hinzu:")
+
+if new_feed_url:
+    selected_feeds.append(new_feed_url)
+
+# Suchbegriffe aus einer Datei laden
+search_terms_file = 'searchterms.txt'  # Pfad zu deiner Datei mit den Suchbegriffen
+search_terms = load_search_terms_from_file(search_terms_file)
+
+# Auswahl der Suchbegriffe nach Kategorien
+selected_terms = []
 for category, terms in search_terms.items():
-    st.write(f"**{category}**: {', '.join(terms)}")
-
-# Eingabefelder zum Hinzufügen neuer Suchbegriffe
-new_category = st.text_input("Neue Kategorie eingeben:")
-new_term = st.text_input("Neuen Suchbegriff zur Kategorie hinzufügen:")
-
-if st.button("Suchbegriff hinzufügen"):
-    if new_category and new_term:
-        if new_category in search_terms:
-            search_terms[new_category].append(new_term)
-        else:
-            search_terms[new_category] = [new_term]
-        st.success(f"Suchbegriff '{new_term}' wurde zur Kategorie '{new_category}' hinzugefügt.")
+    selected = st.multiselect(f"Wähle Suchbegriffe aus der Kategorie '{category}':", terms)
+    selected_terms.extend(selected)
 
 # Liste, um die Artikel für die Übersicht zu sammeln
 articles_list = []
@@ -68,19 +63,24 @@ for feed_url in selected_feeds:
 
     # Die neuesten Einträge des Feeds sammeln (z.B. die letzten 5)
     for entry in feed.entries[:5]:
-        # Hinzufügen der Artikel-Daten zur Übersichtsliste
-        articles_list.append({
-            "Title": entry.title,
-            "Published": entry.published,
-            "Link": entry.link,
-            "Summary": entry.summary
-        })
+        # Filter auf Basis der Suchbegriffe anwenden
+        if any(term.lower() in entry.title.lower() or term.lower() in entry.summary.lower() for term in selected_terms):
+            # Hinzufügen der Artikel-Daten zur Übersichtsliste
+            articles_list.append({
+                "Title": entry.title,
+                "Published": entry.published,
+                "Link": entry.link,
+                "Summary": entry.summary
+            })
 
-# Überblick der Artikel als Pandas DataFrame anzeigen (am Anfang)
+# Überblick der Artikel als Pandas DataFrame anzeigen (jetzt am Anfang)
 if articles_list:
-    st.write("### Überblick der Top-Artikel")
+    st.write("### Überblick der Top-Artikel (basierend auf den ausgewählten Suchbegriffen)")
     df = pd.DataFrame(articles_list)
-    for i, row in df.iterrows():
-        with st.expander(f"{row['Title']} ({row['Published']})"):
-            st.write(f"**Link**: [Klicken um Artikel zu lesen]({row['Link']})")
-            st.write(f"**Zusammenfassung**: {row['Summary']}")
+    st.dataframe(df)
+
+# Details zu jedem Artikel anzeigen (mit Click-to-Expand)
+for article in articles_list:
+    with st.expander(f"{article['Title']} (Published: {article['Published']})"):
+        st.write(article['Summary'])
+        st.write(f"[Mehr lesen]({article['Link']})")
