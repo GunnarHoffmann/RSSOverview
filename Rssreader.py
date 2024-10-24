@@ -25,12 +25,33 @@ new_feed_url = st.text_input("Füge einen neuen RSS-Feed hinzu:")
 if new_feed_url:
     rss_feeds.append(new_feed_url)
 
-st.write(f"Es werden {len(rss_feeds)} Feeds abgerufen.")
-
 # Liste, um die Artikel für die Übersicht zu sammeln
 articles_list = []
 
 # Abrufen und Anzeigen der Feeds
+for feed_url in rss_feeds:
+    feed = fetch_rss_feed(feed_url)
+
+    if feed.bozo:  # Überprüfen, ob der Feed erfolgreich geparst wurde
+        continue
+
+    # Die neuesten Einträge des Feeds sammeln (z.B. die letzten 5)
+    for entry in feed.entries[:5]:
+        # Hinzufügen der Artikel-Daten zur Übersichtsliste
+        articles_list.append({
+            "Title": entry.title,
+            "Published": entry.published,
+            "Link": entry.link
+        })
+
+# Überblick der Artikel als Pandas DataFrame anzeigen (jetzt am Anfang)
+if articles_list:
+    st.write("### Überblick der Top-Artikel")
+    df = pd.DataFrame(articles_list)
+    st.dataframe(df)
+
+# Abrufen und Anzeigen der Feeds im Detail (jetzt nach dem Überblick)
+st.write(f"Es werden {len(rss_feeds)} Feeds abgerufen.")
 for feed_url in rss_feeds:
     st.write(f"**RSS-Feed von:** {feed_url}")
     feed = fetch_rss_feed(feed_url)
@@ -48,16 +69,3 @@ for feed_url in rss_feeds:
         st.write(entry.link)
         st.write(entry.summary)
         st.write("---")
-
-        # Hinzufügen der Artikel-Daten zur Übersichtsliste
-        articles_list.append({
-            "Title": entry.title,
-            "Published": entry.published,
-            "Link": entry.link
-        })
-
-# Überblick der Artikel als Pandas DataFrame anzeigen
-if articles_list:
-    st.write("### Überblick der Top-Artikel")
-    df = pd.DataFrame(articles_list)
-    st.dataframe(df)
