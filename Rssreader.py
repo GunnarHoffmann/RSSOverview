@@ -63,8 +63,11 @@ for article in articles_list:
         st.write(article['Summary'])
         st.write(f"[Read more]({article['Link']})")
 
-# ----------- Search Terms Section ------------
-st.header("Search Terms")
+# Add visual separation between sections
+st.markdown("---")  # Horizontal line
+
+# ----------- Internet-based Semantic Search Section ------------
+st.header("Internet-based Semantic Search")
 
 # Load search terms from a file
 search_terms_file = 'searchterms.txt'  # Path to your file with search terms
