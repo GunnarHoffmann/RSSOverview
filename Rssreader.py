@@ -5,16 +5,19 @@ import streamlit as st
 # Read the OpenAI API key from Streamlit secrets
 openai.api_key = st.secrets["openai"]["api_key"]
 
-# Function to call OpenAI's GPT API to summarize the content
+# Function to call OpenAI's GPT API (Chat API) to summarize the content
 def summarize_content_with_gpt(content):
     try:
-        response = openai.Completion.create(
-            engine="text-davinci-003",  # Or use 'gpt-3.5-turbo'
-            prompt=f"Summarize the following content:\n\n{content}",
-            max_tokens=150,  # Adjust as necessary for the length of the summary
-            temperature=0.7  # Control the creativity of the output
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",  # Use 'gpt-4' if you have access
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": f"Summarize the following content:\n\n{content}"}
+            ],
+            max_tokens=150,  # Adjust for the length of the summary
+            temperature=0.7  # Adjust to control the creativity
         )
-        summary = response.choices[0].text.strip()
+        summary = response['choices'][0]['message']['content'].strip()
         return summary
     except Exception as e:
         return f"Error summarizing content: {e}"
