@@ -1,1 +1,1 @@
-technology:"cloud computing"
+technology:cloud computing
