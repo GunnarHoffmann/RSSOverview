@@ -19,8 +19,6 @@ st.title("RSS-Feed Aggregator")
 rss_feed_file = 'rss_feeds.txt'  # Der Pfad zu deiner Datei mit den Feeds
 rss_feeds = load_rss_feeds_from_file(rss_feed_file)
 
-# Optional: Eingabefeld für zusätzliche Feeds
-new_feed_url = st.text_input("Füge einen neuen RSS-Feed hinzu:")
 
 if new_feed_url:
     rss_feeds.append(new_feed_url)
