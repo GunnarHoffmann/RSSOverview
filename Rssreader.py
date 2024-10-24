@@ -3,8 +3,7 @@ import streamlit as st
 
 # Liste von RSS-Feed-URLs
 rss_feeds = [
-    'https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml',  # Beispiel: New York Times Tech
-    'https://feeds.feedburner.com/TechCrunch/',                     # Beispiel: TechCrunch
+    'https://kiupdate.podigee.io/feed/mp3',                     # Beispiel: TechCrunch
     'https://www.heise.de/rss/heise-atom.xml',                      # Beispiel: Heise
 ]
 
