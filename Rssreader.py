@@ -26,7 +26,10 @@ def fetch_rss_feed(url):
     return feedparser.parse(url)
 
 # Streamlit Anwendung
-st.title("RSS-Feed Aggregator mit Suchbegriffen")
+st.title("RSS-Feed Aggregator und Suchbegriffe")
+
+# ----------- RSS Feeds Bereich ------------
+st.header("RSS-Feeds")
 
 # RSS Feeds aus einer Datei laden
 rss_feed_file = 'rss_feeds.txt'  # Der Pfad zu deiner Datei mit den Feeds
@@ -41,16 +44,6 @@ new_feed_url = st.text_input("Füge einen neuen RSS-Feed hinzu:")
 if new_feed_url:
     selected_feeds.append(new_feed_url)
 
-# Suchbegriffe aus einer Datei laden
-search_terms_file = 'searchterms.txt'  # Pfad zu deiner Datei mit den Suchbegriffen
-search_terms = load_search_terms_from_file(search_terms_file)
-
-# Auswahl der Suchbegriffe nach Kategorien (alle Suchbegriffe vorausgewählt)
-selected_terms = []
-#for category, terms in search_terms.items():
-#   selected = st.multiselect(f"Wähle Suchbegriffe aus der Kategorie '{category}':", terms, default=terms)
-#    selected_terms.extend(selected)
-
 # Liste, um die Artikel für die Übersicht zu sammeln
 articles_list = []
 
@@ -63,19 +56,16 @@ for feed_url in selected_feeds:
 
     # Die neuesten Einträge des Feeds sammeln (z.B. die letzten 5)
     for entry in feed.entries[:5]:
-        # Filter auf Basis der Suchbegriffe anwenden
-        if any(term.lower() in entry.title.lower() or term.lower() in entry.summary.lower() for term in selected_terms):
-            # Hinzufügen der Artikel-Daten zur Übersichtsliste
-            articles_list.append({
-                "Title": entry.title,
-                "Published": entry.published,
-                "Link": entry.link,
-                "Summary": entry.summary
-            })
+        articles_list.append({
+            "Title": entry.title,
+            "Published": entry.published,
+            "Link": entry.link,
+            "Summary": entry.summary
+        })
 
-# Überblick der Artikel als Pandas DataFrame anzeigen (jetzt am Anfang)
+# Überblick der Artikel als Pandas DataFrame anzeigen
 if articles_list:
-    st.write("### Überblick der Top-Artikel (basierend auf den ausgewählten Suchbegriffen)")
+    st.write("### Überblick der Top-Artikel aus den ausgewählten Feeds")
     df = pd.DataFrame(articles_list)
     st.dataframe(df)
 
@@ -84,3 +74,21 @@ for article in articles_list:
     with st.expander(f"{article['Title']} (Published: {article['Published']})"):
         st.write(article['Summary'])
         st.write(f"[Mehr lesen]({article['Link']})")
+
+# ----------- Suchbegriffe Bereich ------------
+st.header("Suchbegriffe Auswahl")
+
+# Suchbegriffe aus einer Datei laden
+search_terms_file = 'searchterms.txt'  # Pfad zu deiner Datei mit den Suchbegriffen
+search_terms = load_search_terms_from_file(search_terms_file)
+
+# Auswahl der Suchbegriffe nach Kategorien (alle Suchbegriffe vorausgewählt)
+selected_terms = []
+for category, terms in search_terms.items():
+    selected = st.multiselect(f"Wähle Suchbegriffe aus der Kategorie '{category}':", terms, default=terms)
+    selected_terms.extend(selected)
+
+# Überblick der ausgewählten Suchbegriffe anzeigen
+if selected_terms:
+    st.write("### Überblick der ausgewählten Suchbegriffe")
+    st.write(", ".join(selected_terms))
