@@ -84,7 +84,7 @@ with st.form(key='rss_form'):
     articles_list = []
     combined_rss_content = ""
 
-    # Always load RSS feed content, but control visibility with toggle
+    # Always load RSS feed content for Combined Output
     for feed_url in selected_feeds:
         feed = fetch_rss_feed(feed_url)
 
@@ -147,8 +147,8 @@ with st.form(key='combined_output_form'):
     
     st.header("Combined Output")
 
-    # Display combined RSS feed content in a text area
-    if articles_list and st.session_state['show_rss_output']:
+    # Display combined RSS feed content in a text area (always show)
+    if articles_list:
         st.text_area("Combined RSS Feed Content", value=combined_rss_content, height=300)
 
     st.form_submit_button(label="Refresh Combined Output")
