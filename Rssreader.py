@@ -62,33 +62,33 @@ with st.form(key='rss_form'):
     # Submit button for RSS form
     rss_submit = st.form_submit_button(label="Update RSS Feeds")
 
+    # List to collect articles for display
+    articles_list = []
+
+    # Fetch and display the selected feeds if the form is submitted
+    if rss_submit:
+        for feed_url in selected_feeds:
+            feed = fetch_rss_feed(feed_url)
+
+            if feed.bozo:  # Check if the feed was parsed successfully
+                continue
+
+            # Collect the latest entries from the feed (e.g., the last 5)
+            for entry in feed.entries[:5]:
+                articles_list.append({
+                    "Title": entry.title,
+                    "Published": entry.published,
+                    "Link": entry.link,
+                    "Summary": entry.summary
+                })
+
+        # Display details for each article (with Click-to-Expand functionality)
+        for article in articles_list:
+            with st.expander(f"{article['Title']} (Published: {article['Published']})"):
+                st.write(article['Summary'])
+                st.write(f"[Read more]({article['Link']})")
+
     st.markdown('</div>', unsafe_allow_html=True)
-
-# List to collect articles for display
-articles_list = []
-
-# Fetch and display the selected feeds if the form is submitted
-if rss_submit:
-    for feed_url in selected_feeds:
-        feed = fetch_rss_feed(feed_url)
-
-        if feed.bozo:  # Check if the feed was parsed successfully
-            continue
-
-        # Collect the latest entries from the feed (e.g., the last 5)
-        for entry in feed.entries[:5]:
-            articles_list.append({
-                "Title": entry.title,
-                "Published": entry.published,
-                "Link": entry.link,
-                "Summary": entry.summary
-            })
-
-    # Display details for each article (with Click-to-Expand functionality)
-    for article in articles_list:
-        with st.expander(f"{article['Title']} (Published: {article['Published']})"):
-            st.write(article['Summary'])
-            st.write(f"[Read more]({article['Link']})")
 
 # Add visual separation between sections
 st.markdown("---")  # Horizontal line
@@ -112,8 +112,8 @@ with st.form(key='search_form'):
     # Submit button for search terms form
     search_submit = st.form_submit_button(label="Update Search Terms")
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    # Handle form submission for search terms (display selected terms)
+    if search_submit:
+        st.write("Selected search terms:", ", ".join(selected_terms))
 
-# Handle form submission for search terms (this could be connected to a search API or results display)
-if search_submit:
-    st.write("Selected search terms:", ", ".join(selected_terms))
+    st.markdown('</div>', unsafe_allow_html=True)
