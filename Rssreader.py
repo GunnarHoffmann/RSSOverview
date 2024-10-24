@@ -80,8 +80,4 @@ selected_terms = []
 for category, terms in search_terms.items():
     selected = st.multiselect(f"Wähle Suchbegriffe aus der Kategorie '{category}':", terms, default=terms)
     selected_terms.extend(selected)
-
-# Überblick der ausgewählten Suchbegriffe anzeigen
-if selected_terms:
-    st.write("### Überblick der ausgewählten Suchbegriffe")
-    st.write(", ".join(selected_terms))
+``
