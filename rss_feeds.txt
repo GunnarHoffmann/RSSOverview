@@ -1,2 +1,2 @@
-https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml
+https://kiupdate.podigee.io/feed/mp3
 https://www.heise.de/rss/heise-atom.xml
