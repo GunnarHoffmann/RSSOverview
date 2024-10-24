@@ -1,21 +1,21 @@
-import openai
+import os
+from openai import OpenAI
 import feedparser
 import streamlit as st
 
-# Read the OpenAI API key from Streamlit secrets
-openai.api_key = st.secrets["openai"]["api_key"]
+# Initialize the OpenAI client
+client = OpenAI(
+    api_key=st.secrets["openai"]["api_key"]
+)
 
-# Function to call OpenAI's GPT API (Chat API) to summarize the content
+# Function to call OpenAI's Chat API to summarize the content
 def summarize_content_with_gpt(content):
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",  # Use 'gpt-4' if you have access
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",  # You can use 'gpt-4' if you have access
             messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": f"Summarize the following content:\n\n{content}"}
-            ],
-            max_tokens=150,  # Adjust for the length of the summary
-            temperature=0.7  # Adjust to control the creativity
+            ]
         )
         summary = response['choices'][0]['message']['content'].strip()
         return summary
