@@ -1,6 +1,5 @@
 import feedparser
 import streamlit as st
-import pandas as pd
 
 # Funktion zum Lesen der RSS-Feeds aus einer Datei
 def load_rss_feeds_from_file(file_path):
@@ -62,12 +61,6 @@ for feed_url in selected_feeds:
             "Link": entry.link,
             "Summary": entry.summary
         })
-
-# Überblick der Artikel als Pandas DataFrame anzeigen
-if articles_list:
-    st.write("### Überblick der Top-Artikel aus den ausgewählten Feeds")
-    df = pd.DataFrame(articles_list)
-    st.dataframe(df)
 
 # Details zu jedem Artikel anzeigen (mit Click-to-Expand)
 for article in articles_list:
