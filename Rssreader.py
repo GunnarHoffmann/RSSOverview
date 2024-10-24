@@ -37,12 +37,6 @@ rss_feeds = load_rss_feeds_from_file(rss_feed_file)
 # Auswahlbox zum Auswählen der RSS-Feeds
 selected_feeds = st.multiselect("Wähle die RSS-Feeds, die du einbeziehen möchtest:", rss_feeds, default=rss_feeds)
 
-# Optional: Eingabefeld für zusätzliche Feeds
-new_feed_url = st.text_input("Füge einen neuen RSS-Feed hinzu:")
-
-if new_feed_url:
-    selected_feeds.append(new_feed_url)
-
 # Liste, um die Artikel für die Übersicht zu sammeln
 articles_list = []
 
