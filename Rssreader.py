@@ -39,6 +39,12 @@ st.markdown("""
         border-radius: 10px;
         margin-bottom: 20px;
     }
+    .combined-section {
+        background-color: #e0e0e0;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -75,6 +81,7 @@ with st.form(key='rss_form'):
 
     # Toggle logic to show or hide the RSS output
     if st.session_state['show_rss_output']:
+        combined_rss_content = ""
         for feed_url in selected_feeds:
             feed = fetch_rss_feed(feed_url)
 
@@ -89,6 +96,7 @@ with st.form(key='rss_form'):
                     "Link": entry.link,
                     "Summary": entry.summary
                 })
+                combined_rss_content += f"{entry.title}\n{entry.published}\n{entry.summary}\n\n"
 
         # Display details for each article (with Click-to-Expand functionality)
         for article in articles_list:
@@ -123,5 +131,19 @@ with st.form(key='search_form'):
     # Handle form submission for search terms (display selected terms)
     if search_submit:
         st.write("Selected search terms:", ", ".join(selected_terms))
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# ----------- Combined Output Section (Form with Background) ------------
+with st.form(key='combined_output_form'):
+    st.markdown('<div class="combined-section">', unsafe_allow_html=True)
+    
+    st.header("Combined Output")
+
+    # Display combined RSS feed content in a text area
+    if st.session_state['show_rss_output'] and articles_list:
+        st.text_area("Combined RSS Feed Content", value=combined_rss_content, height=300)
+    
+    st.form_submit_button(label="Refresh Combined Output")
 
     st.markdown('</div>', unsafe_allow_html=True)
