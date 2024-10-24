@@ -80,9 +80,6 @@ with st.form(key='rss_form'):
     # Multi-select box for choosing RSS feeds
     selected_feeds = st.multiselect("Select the RSS feeds you'd like to include:", rss_feeds, default=rss_feeds)
 
-    # Submit button to toggle RSS output
-    st.form_submit_button(label="Show/Hide RSS Output", on_click=toggle_rss_output)
-
     # List to collect articles for display
     articles_list = []
     combined_rss_content = ""
@@ -103,6 +100,16 @@ with st.form(key='rss_form'):
                 "Summary": entry.summary
             })
             combined_rss_content += f"{entry.title}\n{entry.published}\n{entry.summary}\n\n"
+
+    # Submit button to toggle RSS output
+    rss_submit = st.form_submit_button(label="Show/Hide RSS Output", on_click=toggle_rss_output)
+
+    # Toggle logic to show or hide the RSS output
+    if st.session_state['show_rss_output'] and rss_submit:
+        for article in articles_list:
+            with st.expander(f"{article['Title']} (Published: {article['Published']})"):
+                st.write(article['Summary'])
+                st.write(f"[Read more]({article['Link']})")
 
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -126,10 +133,10 @@ with st.form(key='search_form'):
         selected_terms.extend(selected)
 
     # Submit button for search terms form
-    st.form_submit_button(label="Show/Hide Search Output", on_click=toggle_search_output)
+    search_submit = st.form_submit_button(label="Show/Hide Search Output", on_click=toggle_search_output)
 
     # Handle form submission for search terms (control visibility with toggle)
-    if st.session_state['show_search_output']:
+    if st.session_state['show_search_output'] and search_submit:
         st.write("Selected search terms:", ", ".join(selected_terms))
 
     st.markdown('</div>', unsafe_allow_html=True)
