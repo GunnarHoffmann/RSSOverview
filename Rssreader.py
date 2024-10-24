@@ -4,7 +4,7 @@ import streamlit as st
 # Function to read RSS feeds from a file
 def load_rss_feeds_from_file(file_path):
     with open(file_path, 'r') as file:
-        rss_feeds = [line.strip() for line in file.readlines() if line.strip()]
+        rss_feeds = [line.strip() for line.readlines() if line.strip()]
     return rss_feeds
 
 # Function to read search terms from a file
@@ -24,57 +24,96 @@ def load_search_terms_from_file(file_path):
 def fetch_rss_feed(url):
     return feedparser.parse(url)
 
+# Apply custom CSS for background colors
+st.markdown("""
+    <style>
+    .rss-section {
+        background-color: #f0f0f0;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    .search-section {
+        background-color: #f0f0f0;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
 # Streamlit application
 st.title("Data & AI Newsfeed")
 st.subheader("Aggregating curated RSS feeds and Internet-based semantic search in one place")
 
-# ----------- RSS Feeds Section ------------
-st.header("RSS Feeds")
+# ----------- RSS Feeds Section (Form with Background) ------------
+with st.form(key='rss_form'):
+    st.markdown('<div class="rss-section">', unsafe_allow_html=True)
+    
+    st.header("RSS Feeds")
 
-# Load RSS feeds from a file
-rss_feed_file = 'rss_feeds.txt'  # Path to your file with RSS feeds
-rss_feeds = load_rss_feeds_from_file(rss_feed_file)
+    # Load RSS feeds from a file
+    rss_feed_file = 'rss_feeds.txt'  # Path to your file with RSS feeds
+    rss_feeds = load_rss_feeds_from_file(rss_feed_file)
 
-# Multi-select box for choosing RSS feeds
-selected_feeds = st.multiselect("Select the RSS feeds you'd like to include:", rss_feeds, default=rss_feeds)
+    # Multi-select box for choosing RSS feeds
+    selected_feeds = st.multiselect("Select the RSS feeds you'd like to include:", rss_feeds, default=rss_feeds)
+
+    # Submit button for RSS form
+    rss_submit = st.form_submit_button(label="Update RSS Feeds")
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # List to collect articles for display
 articles_list = []
 
-# Fetch and display the selected feeds
-for feed_url in selected_feeds:
-    feed = fetch_rss_feed(feed_url)
+# Fetch and display the selected feeds if the form is submitted
+if rss_submit:
+    for feed_url in selected_feeds:
+        feed = fetch_rss_feed(feed_url)
 
-    if feed.bozo:  # Check if the feed was parsed successfully
-        continue
+        if feed.bozo:  # Check if the feed was parsed successfully
+            continue
 
-    # Collect the latest entries from the feed (e.g., the last 5)
-    for entry in feed.entries[:5]:
-        articles_list.append({
-            "Title": entry.title,
-            "Published": entry.published,
-            "Link": entry.link,
-            "Summary": entry.summary
-        })
+        # Collect the latest entries from the feed (e.g., the last 5)
+        for entry in feed.entries[:5]:
+            articles_list.append({
+                "Title": entry.title,
+                "Published": entry.published,
+                "Link": entry.link,
+                "Summary": entry.summary
+            })
 
-# Display details for each article (with Click-to-Expand functionality)
-for article in articles_list:
-    with st.expander(f"{article['Title']} (Published: {article['Published']})"):
-        st.write(article['Summary'])
-        st.write(f"[Read more]({article['Link']})")
+    # Display details for each article (with Click-to-Expand functionality)
+    for article in articles_list:
+        with st.expander(f"{article['Title']} (Published: {article['Published']})"):
+            st.write(article['Summary'])
+            st.write(f"[Read more]({article['Link']})")
 
 # Add visual separation between sections
 st.markdown("---")  # Horizontal line
 
-# ----------- Internet-based Semantic Search Section ------------
-st.header("Internet-based Semantic Search")
+# ----------- Internet-based Semantic Search Section (Form with Background) ------------
+with st.form(key='search_form'):
+    st.markdown('<div class="search-section">', unsafe_allow_html=True)
+    
+    st.header("Internet-based Semantic Search")
 
-# Load search terms from a file
-search_terms_file = 'searchterms.txt'  # Path to your file with search terms
-search_terms = load_search_terms_from_file(search_terms_file)
+    # Load search terms from a file
+    search_terms_file = 'searchterms.txt'  # Path to your file with search terms
+    search_terms = load_search_terms_from_file(search_terms_file)
 
-# Multi-select box for selecting search terms by category (pre-selecting all terms)
-selected_terms = []
-for category, terms in search_terms.items():
-    selected = st.multiselect(f"Select search terms from the '{category}' category:", terms, default=terms)
-    selected_terms.extend(selected)
+    # Multi-select box for selecting search terms by category (pre-selecting all terms)
+    selected_terms = []
+    for category, terms in search_terms.items():
+        selected = st.multiselect(f"Select search terms from the '{category}' category:", terms, default=terms)
+        selected_terms.extend(selected)
+
+    # Submit button for search terms form
+    search_submit = st.form_submit_button(label="Update Search Terms")
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# Handle form submission for search terms (this could be connected to a search API or results display)
+if search_submit:
+    st.write("Selected search terms:", ", ".join(selected_terms))
