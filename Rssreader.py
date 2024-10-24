@@ -45,10 +45,10 @@ if new_feed_url:
 search_terms_file = 'searchterms.txt'  # Pfad zu deiner Datei mit den Suchbegriffen
 search_terms = load_search_terms_from_file(search_terms_file)
 
-# Auswahl der Suchbegriffe nach Kategorien
+# Auswahl der Suchbegriffe nach Kategorien (alle Suchbegriffe vorausgewählt)
 selected_terms = []
 for category, terms in search_terms.items():
-    selected = st.multiselect(f"Wähle Suchbegriffe aus der Kategorie '{category}':", terms)
+    selected = st.multiselect(f"Wähle Suchbegriffe aus der Kategorie '{category}':", terms, default=terms)
     selected_terms.extend(selected)
 
 # Liste, um die Artikel für die Übersicht zu sammeln
