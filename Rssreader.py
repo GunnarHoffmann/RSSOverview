@@ -1,23 +1,34 @@
 import os
-from openai import OpenAI
+import requests
+import json
 import feedparser
 import streamlit as st
 
-# Initialize the OpenAI client
-client = OpenAI(
-    api_key=st.secrets["openai"]["api_key"]
-)
+# Read the Azure OpenAI API details from Streamlit secrets
+api_key = st.secrets["azure_openai"]["api_key"]
+endpoint = st.secrets["azure_openai"]["endpoint"]
+deployment_name = st.secrets["azure_openai"]["deployment_name"]
 
-# Function to call OpenAI's Chat API to summarize the content
-def summarize_content_with_gpt(content):
+# Function to call Azure OpenAI's Chat API to summarize the content
+def summarize_content_with_azure(content):
     try:
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",  # You can use 'gpt-4' if you have access
-            messages=[
+        headers = {
+            "Content-Type": "application/json",
+            "api-key": api_key
+        }
+        body = {
+            "messages": [
                 {"role": "user", "content": f"Summarize the following content:\n\n{content}"}
             ]
+        }
+        response = requests.post(
+            f"{endpoint}/openai/deployments/{deployment_name}/chat/completions?api-version=2023-03-15-preview",
+            headers=headers,
+            json=body
         )
-        summary = response['choices'][0]['message']['content'].strip()
+        response.raise_for_status()
+        data = response.json()
+        summary = data["choices"][0]["message"]["content"].strip()
         return summary
     except Exception as e:
         return f"Error summarizing content: {e}"
@@ -183,9 +194,9 @@ with st.form(key='combined_output_form'):
         if articles_list:
             st.text_area("Combined RSS Feed Content", value=combined_rss_content, height=300)
 
-            # Summarize the content using OpenAI API
-            summary = summarize_content_with_gpt(combined_rss_content)
-            st.subheader("Summary (Powered by GPT):")
+            # Summarize the content using Azure OpenAI
+            summary = summarize_content_with_azure(combined_rss_content)
+            st.subheader("Summary (Powered by Azure OpenAI):")
             st.write(summary)
 
     st.markdown('</div>', unsafe_allow_html=True)
