@@ -9,10 +9,10 @@ openai.api_key = st.secrets["openai"]["api_key"]
 def summarize_content_with_gpt(content):
     try:
         response = openai.Completion.create(
-            engine="text-davinci-003",  # Or use 'gpt-3.5-turbo' depending on your API access
+            engine="text-davinci-003",  # Or use 'gpt-3.5-turbo'
             prompt=f"Summarize the following content:\n\n{content}",
             max_tokens=150,  # Adjust as necessary for the length of the summary
-            temperature=0.7  # Control the randomness of the output
+            temperature=0.7  # Control the creativity of the output
         )
         summary = response.choices[0].text.strip()
         return summary
@@ -24,6 +24,19 @@ def load_rss_feeds_from_file(file_path):
     with open(file_path, 'r') as file:
         rss_feeds = [line.strip() for line in file.readlines() if line.strip()]
     return rss_feeds
+
+# Function to read search terms from a file
+def load_search_terms_from_file(file_path):
+    search_terms = {}
+    with open(file_path, 'r') as file:
+        for line in file:
+            if ':' in line:
+                category, term = line.strip().split(':')
+                if category in search_terms:
+                    search_terms[category].append(term)
+                else:
+                    search_terms[category] = [term]
+    return search_terms
 
 # Function to fetch and parse the RSS feeds
 def fetch_rss_feed(url):
@@ -38,6 +51,12 @@ st.markdown("""
         border-radius: 10px;
         margin-bottom: 20px;
     }
+    .search-section {
+        background-color: #f0f0f0;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
     .combined-section {
         background-color: #e0e0e0;
         padding: 15px;
@@ -47,7 +66,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# Streamlit application title and subtitle
+# Streamlit application
 st.title("Data & AI Newsfeed")
 st.subheader("Aggregating curated RSS feeds and Internet-based semantic search in one place")
 
@@ -55,12 +74,19 @@ st.subheader("Aggregating curated RSS feeds and Internet-based semantic search i
 if 'show_rss_output' not in st.session_state:
     st.session_state['show_rss_output'] = False
 
+if 'show_search_output' not in st.session_state:
+    st.session_state['show_search_output'] = False
+
 if 'show_combined_output' not in st.session_state:
     st.session_state['show_combined_output'] = False
 
 # Function to toggle RSS output visibility
 def toggle_rss_output():
     st.session_state['show_rss_output'] = not st.session_state['show_rss_output']
+
+# Function to toggle search output visibility
+def toggle_search_output():
+    st.session_state['show_search_output'] = not st.session_state['show_search_output']
 
 # Function to toggle combined output visibility
 def toggle_combined_output():
@@ -114,6 +140,31 @@ with st.form(key='rss_form'):
 
 # Add visual separation between sections
 st.markdown("---")  # Horizontal line
+
+# ----------- Internet-based Semantic Search Section (Form with Background) ------------
+with st.form(key='search_form'):
+    st.markdown('<div class="search-section">', unsafe_allow_html=True)
+    
+    st.header("Internet-based Semantic Search")
+
+    # Load search terms from a file
+    search_terms_file = 'searchterms.txt'  # Path to your file with search terms
+    search_terms = load_search_terms_from_file(search_terms_file)
+
+    # Multi-select box for selecting search terms by category (pre-selecting all terms)
+    selected_terms = []
+    for category, terms in search_terms.items():
+        selected = st.multiselect(f"Select search terms from the '{category}' category:", terms, default=terms)
+        selected_terms.extend(selected)
+
+    # Submit button for search terms form
+    search_submit = st.form_submit_button(label="Show/Hide Search Output", on_click=toggle_search_output)
+
+    # Handle form submission for search terms (control visibility with toggle)
+    if st.session_state['show_search_output'] and search_submit:
+        st.write("Selected search terms:", ", ".join(selected_terms))
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # ----------- Combined Output Section (Form with Background) ------------
 with st.form(key='combined_output_form'):
