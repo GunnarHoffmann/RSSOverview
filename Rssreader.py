@@ -1,11 +1,11 @@
 import feedparser
 import streamlit as st
 
-# Liste von RSS-Feed-URLs
-rss_feeds = [
-    'https://kiupdate.podigee.io/feed/mp3',                     # Beispiel: TechCrunch
-    'https://www.heise.de/rss/heise-atom.xml',                      # Beispiel: Heise
-]
+# Funktion zum Lesen der RSS-Feeds aus einer Datei
+def load_rss_feeds_from_file(file_path):
+    with open(file_path, 'r') as file:
+        rss_feeds = [line.strip() for line in file.readlines() if line.strip()]
+    return rss_feeds
 
 # Funktion zum Abrufen und Bündeln der Feeds
 def fetch_rss_feed(url):
@@ -14,7 +14,11 @@ def fetch_rss_feed(url):
 # Streamlit Anwendung
 st.title("RSS-Feed Aggregator")
 
-# Eingabefeld für zusätzliche Feeds
+# RSS Feeds aus einer Datei laden
+rss_feed_file = 'rss_feeds.txt'  # Der Pfad zu deiner Datei mit den Feeds
+rss_feeds = load_rss_feeds_from_file(rss_feed_file)
+
+# Optional: Eingabefeld für zusätzliche Feeds
 new_feed_url = st.text_input("Füge einen neuen RSS-Feed hinzu:")
 
 if new_feed_url:
