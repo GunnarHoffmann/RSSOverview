@@ -20,10 +20,6 @@ rss_feed_file = 'rss_feeds.txt'
 # Der Pfad zu deiner Datei mit den Feeds
 rss_feeds = load_rss_feeds_from_file(rss_feed_file)
 
-
-if new_feed_url:
-    rss_feeds.append(new_feed_url)
-
 # Liste, um die Artikel für die Übersicht zu sammeln
 articles_list = []
 
