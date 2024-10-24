@@ -59,6 +59,9 @@ if 'show_rss_output' not in st.session_state:
 if 'show_search_output' not in st.session_state:
     st.session_state['show_search_output'] = False
 
+if 'show_combined_output' not in st.session_state:
+    st.session_state['show_combined_output'] = False
+
 # Function to toggle RSS output visibility
 def toggle_rss_output():
     st.session_state['show_rss_output'] = not st.session_state['show_rss_output']
@@ -66,6 +69,10 @@ def toggle_rss_output():
 # Function to toggle search output visibility
 def toggle_search_output():
     st.session_state['show_search_output'] = not st.session_state['show_search_output']
+
+# Function to toggle combined output visibility
+def toggle_combined_output():
+    st.session_state['show_combined_output'] = not st.session_state['show_combined_output']
 
 # ----------- RSS Feeds Section (Form with Background) ------------
 with st.form(key='rss_form'):
@@ -147,10 +154,12 @@ with st.form(key='combined_output_form'):
     
     st.header("Combined Output")
 
-    # Display combined RSS feed content in a text area (always show)
-    if articles_list:
-        st.text_area("Combined RSS Feed Content", value=combined_rss_content, height=300)
+    # Submit button to toggle Combined Output visibility
+    combined_submit = st.form_submit_button(label="Show/Hide Combined Output", on_click=toggle_combined_output)
 
-    st.form_submit_button(label="Refresh Combined Output")
+    # Display combined RSS feed content in a text area (controlled by toggle)
+    if st.session_state['show_combined_output'] and combined_submit:
+        if articles_list:
+            st.text_area("Combined RSS Feed Content", value=combined_rss_content, height=300)
 
     st.markdown('</div>', unsafe_allow_html=True)
