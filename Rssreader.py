@@ -8,6 +8,9 @@ def load_rss_feeds_from_file(file_path):
         rss_feeds = [line.strip() for line in file.readlines() if line.strip()]
     return rss_feeds
 
+# Auswahlbox zum Auswählen der RSS-Feeds
+selected_feeds = st.multiselect("Wähle die RSS-Feeds, die du einbeziehen möchtest:", rss_feeds, default=rss_feeds)
+
 # Funktion zum Abrufen und Bündeln der Feeds
 def fetch_rss_feed(url):
     return feedparser.parse(url)
