@@ -1,7 +1,6 @@
 feedparser
 streamlit
 pandas
-openai
 os
 requests
 json
