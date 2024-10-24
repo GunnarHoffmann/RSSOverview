@@ -4,7 +4,7 @@ import streamlit as st
 # Function to read RSS feeds from a file
 def load_rss_feeds_from_file(file_path):
     with open(file_path, 'r') as file:
-        rss_feeds = [line.strip() for line.readlines() if line.strip()]
+        rss_feeds = [line.strip() for line in file.readlines() if line.strip()]
     return rss_feeds
 
 # Function to read search terms from a file
