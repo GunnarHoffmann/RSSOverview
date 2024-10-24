@@ -1,1 +1,4 @@
 technology:cloud computing
+technology:aws
+technology:azure
+energy business:eon digital
