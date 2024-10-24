@@ -16,7 +16,8 @@ def fetch_rss_feed(url):
 st.title("RSS-Feed Aggregator")
 
 # RSS Feeds aus einer Datei laden
-rss_feed_file = 'rss_feeds.txt'  # Der Pfad zu deiner Datei mit den Feeds
+rss_feed_file = 'rss_feeds.txt'  
+# Der Pfad zu deiner Datei mit den Feeds
 rss_feeds = load_rss_feeds_from_file(rss_feed_file)
 
 
