@@ -1,2 +1,2 @@
-import feedparser
-import streamlit
+feedparser
+streamlit
