@@ -25,7 +25,8 @@ def fetch_rss_feed(url):
     return feedparser.parse(url)
 
 # Streamlit Anwendung
-st.title("RSS-Feed Aggregator mit Suchbegriffen")
+st.title("Data & AI Newsfeed")
+st.subheader("Aggregating Curated Feeds and Bing News in One Place")
 
 # ----------- RSS Feeds Bereich ------------
 st.header("RSS-Feeds")
